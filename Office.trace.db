@@ -1,0 +1,8 @@
+2025-11-05 17:26:57 jdbc[3]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: Таблица "DEPARTMENT" не найдена
+Table "DEPARTMENT" not found; SQL statement:
+Select * from Department [42102-199]
+2025-11-05 17:26:59 jdbc[3]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: Таблица "EMPLOYEE" не найдена
+Table "EMPLOYEE" not found; SQL statement:
+Select Employee.ID, Employee.Name,Department.Name as DepName from Employee join Department on Employee.DepartmentID=Department.ID [42102-199]
