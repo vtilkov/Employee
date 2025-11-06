@@ -1,6 +1,7 @@
 package ru;
 
 import java.sql.*;
+import java.util.List;
 
 public class Employee {
     public static void main (String[]args){
@@ -11,15 +12,17 @@ public class Employee {
 
             try {
                 // Пробуем подключиться к существующей базе
-                try (Connection connection = DriverManager.getConnection("jdbc:h2:./Office")) {
+                //Используем in-memory H2 базу для тестов
+                /*строка подключения к базе данных H2, которая указывает на создание in-memory базы данных с именем test и обеспечивает ее незакрываемость до явного завершения работы приложения.*/
+                try (Connection connection = DriverManager.getConnection("jdbc:h2:mem:office;DB_CLOSE_DELAY=-1")) {
                     System.out.println("Успешное подключение к базе данных");
+                    createTables(connection);
+                    insertTestData(connection);
                     executeTasks(connection);
                 }
 
             } catch (SQLException e) {
                 System.out.println("Ошибка подключения: " + e.getMessage());
-                System.out.println("Попытка восстановления базы данных...");
-                recreateDatabase();
             }
         }
 
@@ -117,24 +120,32 @@ public class Employee {
             System.out.println("Тестовые данные готовы");
         }
 
+        //используют Service класс вместо прямой работы с бд
         private static void executeTasks (Connection connection) throws SQLException {
 
+        Service service = new Service(connection);
         System.out.println("\n ++ ВЫПОЛНИМ ЗАДАЧИ ++ ");
 
             /*Задача 1
             Найдите ID сотрудника с именем Ann. Если такой сотрудник только один, то установите его
             департамент в HR.*/
-            task1(connection);
+            List<Integer> annIds = service.findEmployeeByName("Ann");
+            if (annIds.size() == 1) {
+                service.updateEmployeeDepartment(annIds.get(0), "HR");
+                System.out.println("Ann переведена в HR отдел");
 
             /*Задача 2
             Проверьте имена всех сотрудников. Если чьё-то имя написано с маленькой буквы, исправьте её на большую. Выведите на экран количество исправленных имён.*/
-            task2(connection);
+            int correctedCount = service.correctEmployeeNames();
+                System.out.println("Исправлено имен - " + correctedCount);
 
             /*Задача 3
             Выведите на экран количество сотрудников в IT-отделе*/
-            task3(connection);
+            int itCount = service.countEmployeesInDepartment("IT");
+                System.out.println("отрудников в IT отделе: " + itCount);
         }
 
+        /*
         private static void task1 (Connection connection) throws SQLException {
             System.out.println("\n ++ Задача 1 ++ ");
 
@@ -202,6 +213,6 @@ public class Employee {
                     int count = rs.getInt("count");
                     System.out.println("отрудников в IT отделе: " + count);
                 }
-            }
+            }   */
         }
 }
